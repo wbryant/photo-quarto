@@ -8,12 +8,65 @@ jupyter: python3
 Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 
 ```{python}
-1 + 1
+
+from pathlib import Path
+from PIL import Image
+import re
+
 ```
 
 ```{python}
 
+im = Image.open("data/photos/20220725_132444.jpg")
 
+```
+
+```{python}
+
+print(im.format, im.size, im.mode)
+
+```
+
+```{python}
+
+# image size
+xsize, ysize = im.size
+
+# Merge 2 images
+def merge(im1, im2):
+    w = im1.size[0] + im2.size[0]
+    h = max(im1.size[1], im2.size[1])
+    im = Image.new("RGBA", (w, h))
+
+    im.paste(im1)
+    im.paste(im2, (im1.size[0], 0))
+
+    return im
+
+# Resize/rotate
+out = im.resize((128, 128))
+out = im.rotate(90) # degrees counter-clockwise
+
+```
+
+```{python}
+
+## Get pairs of images (datetime order)
+
+## Use pathlib
+photos = Path("data/photos")
+
+old_photo_names = list(photos.glob('**/*.jpg'))
+
+new_photo_names = [re.sub("IMG_","",photo_name.name) for photo_name in old_photo_names]
+## OR SORT PHOTOS BY DATE/TIME?????
+
+
+```
+
+```{python}
+
+len(set(new_photo_names))
 
 ```
 
