@@ -11,13 +11,14 @@ Quarto enables you to weave together content and executable code into a finished
 
 from pathlib import Path
 from PIL import Image
+import itertools
 import re
 
 ```
 
 ```{python}
 
-im = Image.open("data/photos/20220725_132444.jpg")
+im = Image.open("photos/IMG_20230723_112716.jpg")
 
 ```
 
@@ -29,23 +30,39 @@ print(im.format, im.size, im.mode)
 
 ```{python}
 
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
 # image size
 xsize, ysize = im.size
 
 # Merge 2 images
-def merge(im1, im2):
+def merge(im1_file, im2_file):
+    im1 = Image.open(im1_file)
+    im2 = Image.open(im2_file)
+    
+    if im1.size[0] > im1.size[1]:
+        im1 = im1.rotate(90, expand = True)
+    if im2.size[0] > im2.size[1]:
+        im2 = im2.rotate(90, expand = True)
+    
     w = im1.size[0] + im2.size[0]
     h = max(im1.size[1], im2.size[1])
     im = Image.new("RGBA", (w, h))
 
     im.paste(im1)
     im.paste(im2, (im1.size[0], 0))
-
+    im = im.convert("RGB")
+    
     return im
 
 # Resize/rotate
 out = im.resize((128, 128))
 out = im.rotate(90) # degrees counter-clockwise
+
+print(out)
 
 ```
 
@@ -54,7 +71,7 @@ out = im.rotate(90) # degrees counter-clockwise
 ## Get pairs of images (datetime order)
 
 ## Use pathlib
-photos = Path("data/photos")
+photos = Path("photos")
 
 old_photo_names = list(photos.glob('**/*.jpg'))
 
@@ -70,3 +87,13 @@ len(set(new_photo_names))
 
 ```
 
+```{python}
+
+i = 0
+
+for a in chunks(old_photo_names, 2):
+    im = merge(*a)
+    i = i + 1
+    im.save(f"C:/Users/BryanW/local_dev/photo-quarto/photos-out/merged_out_{i}.jpg")
+
+```
